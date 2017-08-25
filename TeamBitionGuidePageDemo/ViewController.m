@@ -449,16 +449,16 @@
 
 // 第一页的三个view
 
-// 控件保持不动
+// 主要操作方法
 
 - (void)hoverView:(CGPoint)point {
-    
+    // 保持浮动视图，如背景、跨越三个视图的三个控件等
     for (UIView *view in _hoverViewArray) {
         CGRect frame = view.frame;
         frame.origin.x = frame.origin.x + point.x - offsetX;
         view.frame = frame;
     }
-    
+    // 第二页头像缩放
     if (point.x>=262.5*RATIO&&point.x<=Screen_Width) {
         CGFloat scale = (point.x - 262.5*RATIO)/112.5*RATIO;
         [_personView setTransform:CGAffineTransformMakeScale(scale+0.0001, scale+0.0001)];
@@ -466,14 +466,15 @@
     else if(point.x<262.5*RATIO) {
         [_personView setTransform:CGAffineTransformMakeScale(0.0001, 0.0001)];
     }
-
+    // 两次翻页的具体操作
     if (point.x<=Screen_Width) {
+        // 第一页
         CGFloat rate =  point.x/Screen_Width;
-
+        // 获取三个浮动视图的frame
         CGRect aiFrameSmall = _aiImageViewSmall.frame;
         CGRect aiFrameBig = _aiImageViewBig.frame;
         CGRect designLabelFrame = _designLabelImageView.frame;
-
+        // 根据偏移量操作坐标
         aiFrameSmall.origin.x = aiSmallX + 317*rate*RATIO;
         aiFrameSmall.origin.y = aiSmallY - 159*rate*RATIO;
 
@@ -482,16 +483,17 @@
 
         designLabelFrame.origin.x = designX + 276.5*rate*RATIO;
         designLabelFrame.origin.y = designY + -171*rate*RATIO;
-
+        // 更新三个浮动视图frame
         _aiImageViewSmall.frame     = aiFrameSmall;
         _aiImageViewBig.frame       = aiFrameBig;
         _designLabelImageView.frame = designLabelFrame;
-
+        // 以下操作第二页三个工作标签
+        // 在偏移量到屏幕尺寸的0.7前保持原坐标，到达后，三个标签保持浮动
         CGRect staffframe1 = _staffImageView1.frame;
         CGFloat x1 = primeX1 + ((point.x - 262.5*RATIO)>=0 ? (point.x - 262.5*RATIO) : 0);
         staffframe1.origin.x = x1;
         _staffImageView1.frame = staffframe1;
-
+        // 以下操作，在偏移量到达屏幕一半前保持原坐标，到达一半后，在屏幕尺寸一半到屏幕尺寸的0.7之间要完成：第二个标签往右移动75，第三个往右移动150。
         CGRect staffframe2 = _staffImageView2.frame;
         if (point.x>=(Screen_Width/2) && point.x<=262.5*RATIO) {
             staffframe2.origin.x = primeX2 - (point.x - Screen_Width/2);
@@ -512,7 +514,9 @@
             CGFloat x = primeX1 + point.x - 262.5*RATIO;
             staffframe3.origin.x = x;
             _staffImageView3.frame = staffframe3;
-        }else if(point.x<(Screen_Width/2)) {
+        }
+        // 防止快速滑动偏移不准，当偏移量小于屏幕一半尺寸，第二第三个偏移修正到原始尺寸
+        if(point.x<(Screen_Width/2)) {
             CGRect staffframe2 = _staffImageView2.frame;
             CGRect staffframe3 = _staffImageView3.frame;
 
@@ -522,13 +526,13 @@
             _staffImageView2.frame = staffframe2;
             _staffImageView3.frame = staffframe3;
         }
-
-        if (point.x>=262.5*RATIO) {
+/// fix: 修正透明展示
+//        if (point.x>=262.5*RATIO) {
             CGFloat alpha = (point.x-262.5*RATIO)/37.5*RATIO;
             _checkView1.alpha = alpha;
             _checkView2.alpha = alpha - 1;
             _checkView3.alpha = alpha - 2;
-        }
+//        }
     }else {
         CGFloat alpha = (point.x-Screen_Width)/Screen_Width;
         CGFloat offset = point.x - Screen_Width;
@@ -632,10 +636,5 @@
         _indicatorImageView3.alpha = 1 - alpha;
     }
 }
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
 
 @end
